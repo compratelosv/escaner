@@ -37,6 +37,17 @@ node serve.mjs 5173  # http://localhost:5173
 
 Las librerías de escaneo y de generación de códigos están **vendorizadas** en `vendor/`, así que la app no depende de ningún CDN y funciona sin red.
 
+## Despliegue
+
+```bash
+GIT_TERMINAL_PROMPT=0 git -c credential.helper='!gh auth git-credential' \
+  -c http.version=HTTP/1.1 push origin main
+```
+
+GitHub Pages reconstruye en 1–2 minutos desde `main`. **Regla obligatoria:** subir el número de `CACHE` en `sw.js` (`ctl-escaner-vN`) en cada release. El nombre del caché es lo que dispara la reinstalación del service worker; si no cambia, los teléfonos que ya instalaron la app seguirán ejecutando la copia anterior.
+
+Verificar el despliegue con `gh api repos/compratelosv/escaner/pages/builds/latest --jq .status` hasta ver `built`.
+
 ## Estructura
 
 ```
