@@ -1,10 +1,14 @@
 /* sw.js — service worker: app shell servible sin conexión.
  * Estrategia: stale-while-revalidate para recursos propios: se sirve la copia
- * en caché al instante y se descarga la nueva en segundo plano, de modo que un
- * deploy nunca deja al usuario atascado en una versión vieja del código.
- * Navegación: red primero, con respaldo en caché cuando no hay conexión.
+ * en caché al instante y se descarga la nueva en segundo plano.
+ *
+ * IMPORTANTE al desplegar: subir el número de CACHE en cada release. El nombre
+ * es lo que dispara la reinstalación; si no cambia, el navegador conserva el
+ * service worker anterior. Los recursos se piden con `cache: 'reload'` para
+ * ignorar la caché HTTP de GitHub Pages (max-age=600) y no congelar una
+ * versión vieja del código.
  */
-const CACHE = 'ctl-escaner-v2';
+const CACHE = 'ctl-escaner-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -24,7 +28,10 @@ const ASSETS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      // cache:'reload' ignora la caché HTTP del navegador y del CDN.
+      .then((cache) => cache.addAll(ASSETS.map((url) => new Request(url, { cache: 'reload' }))))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -39,7 +46,8 @@ self.addEventListener('activate', (event) => {
 async function staleWhileRevalidate(request) {
   const cache = await caches.open(CACHE);
   const cached = await cache.match(request);
-  const network = fetch(request)
+  // 'no-cache' revalida con el servidor: si el archivo cambió, se actualiza ya.
+  const network = fetch(request, { cache: 'no-cache' })
     .then((res) => {
       if (res && res.ok) cache.put(request, res.clone()).catch(() => {});
       return res;
