@@ -4,6 +4,15 @@ PWA (app web instalable) para leer **códigos QR y de barras** con la cámara de
 
 Funciona **sin Play Store** y **sin conexión** una vez abierta. Se instala desde Chrome: menú ⋮ → *Instalar aplicación*.
 
+**App publicada:** https://compratelosv.github.io/escaner/ (repo `compratelosv/escaner`, GitHub Pages desde `main`).
+
+## Instalar en el teléfono
+
+1. Abrir `https://compratelosv.github.io/escaner/` en **Chrome para Android**.
+2. Menú ⋮ → **Instalar aplicación** (o "Agregar a pantalla principal").
+3. Abrir desde el ícono, pulsar **Encender cámara** y aceptar el permiso.
+4. Utilizar los botones de linterna ⇄ / 🖼 según haga falta.
+
 ## Qué hace
 
 | Módulo | Estado | Descripción |
@@ -65,8 +74,9 @@ Pruebas corridas en Chrome sobre `http://localhost:5173` (2026-11-24):
 - Alta, edición (estado `vendido`, stock `0`) y listado con filtros por estado. ✅
 - Historial registrando cada lectura con su formato. ✅
 - Persistencia comprobada leyendo `localStorage` directamente. ✅
+- Producción (`https://compratelosv.github.io/escaner/`): contexto seguro activo, service worker registrado con scope correcto, manifest presente, QR generado y releído (`PROD-TEST-1` / `QR`). ✅
 
-**No verificado todavía:** lectura con cámara real en un teléfono físico, linterna, y despliegue HTTPS. Requiere un dispositivo y un hosting HTTPS.
+**No verificado todavía:** lectura con cámara real en un teléfono físico y linterna. Requiere un dispositivo; el entorno de prueba no tiene cámara.
 
 ## Pendientes conocidos
 
