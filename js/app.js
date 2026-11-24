@@ -296,7 +296,10 @@ async function renderLabel() {
 
     $('#pvName').textContent = f.name || 'Artículo sin nombre';
     $('#pvPrice').textContent = f.price ? money(store.normalizePrice(f.price)) : '';
+    // Cuando hay barras, JsBarcode ya imprime el valor bajo el código:
+    // repetirlo aquí duplicaría el texto en la etiqueta.
     $('#pvCode').textContent = f.code;
+    $('#pvCode').classList.toggle('hidden', showBars);
     $('#labelPreview').classList.remove('hidden');
     state.label = f;
     setStatus('Etiqueta generada.', 'ok');
