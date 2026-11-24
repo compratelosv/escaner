@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Compratelosv · Escáner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d0d0f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="dot"></span>
+    <span>Compratelosv <b>Escáner</b></span>
+  </div>
+  <button id="btnInstall" class="ghost-btn hidden" type="button">Instalar app</button>
+</header>
+
+<main id="main">
+
+  <!-- ============ ESCANEAR ============ -->
+  <section class="view" id="view-scan">
+    <div class="camera-wrap" id="cameraWrap">
+      <video id="video" playsinline muted autoplay></video>
+      <div class="reticle" id="reticle"><span></span><span></span><span></span><span></span></div>
+      <div class="cam-placeholder" id="camPlaceholder">
+        <p>La cámara está apagada</p>
+        <small>Pulsa <b>Encender cámara</b> y permite el acceso.</small>
+      </div>
+      <button class="torch hidden" id="btnTorch" type="button" title="Linterna">⚡</button>
+    </div>
+
+    <div class="ctrl-row">
+      <button class="btn primary" id="btnCam" type="button">Encender cámara</button>
+      <button class="btn" id="btnFlip" type="button" title="Cambiar cámara">⇄</button>
+      <button class="btn" id="btnFile" type="button" title="Leer desde imagen">🖼</button>
+      <input type="file" id="fileInput" accept="image/*" capture="environment" hidden>
+    </div>
+
+    <div id="status" class="status" role="status" aria-live="polite">Listo para escanear.</div>
+
+    <article class="result-card hidden" id="resultCard">
+      <div class="result-head">
+        <span class="chip" id="resFormat">—</span>
+        <span class="muted" id="resTime"></span>
+      </div>
+      <p class="code-value" id="resValue">—</p>
+      <p class="match-line hidden" id="resMatch"></p>
+      <div class="result-actions">
+        <button class="btn primary" id="btnOpenProduct" type="button">Ver producto</button>
+        <button class="btn" id="btnNewProduct" type="button">Crear producto</button>
+        <button class="btn" id="btnCopy" type="button">Copiar</button>
+      </div>
+    </article>
+
+    <p class="hint">Formatos: QR, EAN-13/8, UPC-A/E, Code 128/39/93, ITF, Data Matrix, PDF417, Aztec.</p>
+  </section>
+
+  <!-- ============ PRODUCTOS / INVENTARIO ============ -->
+  <section class="view hidden" id="view-products">
+    <div class="row-between">
+      <h2>Productos</h2>
+      <button class="btn primary small" id="btnAddProduct" type="button">+ Nuevo</button>
+    </div>
+    <div class="searchbar">
+      <input type="search" id="searchProducts" placeholder="Buscar por nombre o código…" inputmode="search">
+    </div>
+    <div class="filter-chips" id="filterChips">
+      <button class="chip-btn active" data-filter="all" type="button">Todos</button>
+      <button class="chip-btn" data-filter="disponible" type="button">Disponibles</button>
+      <button class="chip-btn" data-filter="vendido" type="button">Vendidos</button>
+      <button class="chip-btn" data-filter="reservado" type="button">Reservados</button>
+    </div>
+    <div id="productList" class="list"></div>
+    <p class="empty hidden" id="productsEmpty">Sin productos todavía. Crea uno o escanea una etiqueta.</p>
+  </section>
+
+  <!-- ============ HISTORIAL ============ -->
+  <section class="view hidden" id="view-history">
+    <div class="row-between">
+      <h2>Historial</h2>
+      <button class="btn small" id="btnClearHistory" type="button">Borrar</button>
+    </div>
+    <p class="hint">Guardado en este teléfono. Los últimos 300 escaneos.</p>
+    <div id="historyList" class="list"></div>
+    <p class="empty hidden" id="historyEmpty">Aún no hay escaneos.</p>
+  </section>
+
+  <!-- ============ ETIQUETAS ============ -->
+  <section class="view hidden" id="view-labels">
+    <h2>Etiquetas</h2>
+    <p class="hint">Genera el código de una pieza única y guárdalo como PNG o imprímelo.</p>
+    <div class="field">
+      <label for="lblCode">Código</label>
+      <div class="inline">
+        <input id="lblCode" placeholder="CTL-0001" autocapitalize="characters">
+        <button class="btn" id="btnGenCode" type="button" title="Generar código">⟳</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="lblName">Nombre</label>
+      <input id="lblName" placeholder="Blusa negra talla M">
+    </div>
+    <div class="field">
+      <label for="lblPrice">Precio (USD)</label>
+      <input id="lblPrice" inputmode="decimal" placeholder="12.50">
+    </div>
+    <div class="field">
+      <label for="lblType">Formato</label>
+      <select id="lblType">
+        <option value="qr">QR</option>
+        <option value="code128">Código de barras (Code 128)</option>
+        <option value="both">Ambos</option>
+      </select>
+    </div>
+    <button class="btn primary block" id="btnRender" type="button">Generar etiqueta</button>
+
+    <div class="label-preview hidden" id="labelPreview">
+      <div class="label-sheet" id="labelSheet">
+        <p class="lbl-name" id="pvName">—</p>
+        <p class="lbl-price" id="pvPrice"></p>
+        <canvas id="canvasQR"></canvas>
+        <svg id="svgBars"></svg>
+        <p class="lbl-code" id="pvCode">—</p>
+      </div>
+      <div class="ctrl-row">
+        <button class="btn" id="btnDownloadQR" type="button">PNG</button>
+        <button class="btn" id="btnPrint" type="button">Imprimir</button>
+        <button class="btn primary" id="btnSaveProduct" type="button">Guardar producto</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<nav class="tabbar">
+  <button class="tab active" data-view="scan" type="button"><i>⌗</i><span>Escanear</span></button>
+  <button class="tab" data-view="products" type="button"><i>▦</i><span>Productos</span></button>
+  <button class="tab" data-view="history" type="button"><i>≡</i><span>Historial</span></button>
+  <button class="tab" data-view="labels" type="button"><i>❏</i><span>Etiquetas</span></button>
+</nav>
+
+<!-- Modal producto -->
+<dialog id="productDialog">
+  <form method="dialog" id="productForm">
+    <h3 id="dlgTitle">Producto</h3>
+    <div class="field">
+      <label for="pCode">Código</label>
+      <input id="pCode" required autocapitalize="characters">
+    </div>
+    <div class="field">
+      <label for="pName">Nombre</label>
+      <input id="pName" required placeholder="Blusa negra talla M">
+    </div>
+    <div class="field-2">
+      <div class="field">
+        <label for="pPrice">Precio USD</label>
+        <input id="pPrice" inputmode="decimal" placeholder="12.50">
+      </div>
+      <div class="field">
+        <label for="pStock">Stock</label>
+        <input id="pStock" inputmode="numeric" type="number" min="0" step="1" value="1">
+      </div>
+    </div>
+    <div class="field">
+      <label for="pStatus">Estado</label>
+      <select id="pStatus">
+        <option value="disponible">Disponible</option>
+        <option value="reservado">Reservado</option>
+        <option value="vendido">Vendido</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="pNotes">Notas</label>
+      <input id="pNotes" placeholder="Talla, detalles, ubicación…">
+    </div>
+    <div class="dialog-actions">
+      <button class="btn danger hidden" id="btnDeleteProduct" type="button">Eliminar</button>
+      <button class="btn" value="cancel" type="submit" formnovalidate>Cancelar</button>
+      <button class="btn primary" id="btnSaveDialog" value="save" type="submit">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="vendor/zxing-library.min.js"></script>
+<script src="vendor/zxing-browser.min.js"></script>
+<script src="vendor/qrcode-generator.js"></script>
+<script src="vendor/jsbarcode.min.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

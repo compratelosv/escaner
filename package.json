@@ -1,0 +1,19 @@
+{
+  "name": "compratelosv-escaner",
+  "version": "0.1.0",
+  "description": "PWA de escaneo de codigos QR y de barras para el inventario de Compratelosv",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node serve.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@zxing/browser": "^0.2.1",
+    "@zxing/library": "^0.23.0",
+    "jsbarcode": "^3.12.3",
+    "qrcode-generator": "^2.0.4"
+  }
+}
